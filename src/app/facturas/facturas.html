@@ -5,7 +5,7 @@
   </header>
 
   <div class="content-card">
-    
+
     <div class="toolbar">
       <div class="search-box">
         <span class="icon-search">🔍</span>
@@ -53,7 +53,8 @@
             <!-- Update Status Action -->
             <button title="Cambiar Estado" (click)="openStatusModal(invoice)" class="action-btn">⚙️</button>
             <!-- Delete Action -->
-            <button title="Eliminar" (click)="deleteInvoice(invoice.invoiceId)" class="action-btn delete-btn">🗑️</button>
+            <button title="Eliminar" (click)="deleteInvoice(invoice.invoiceId)"
+              class="action-btn delete-btn">🗑️</button>
           </td>
         </tr>
         <tr *ngIf="invoices.length === 0 && !isLoading">
@@ -72,7 +73,8 @@
     <div class="pagination-section">
       <span class="page-info">Página {{ currentPageIndex + 1 }}</span>
       <div class="pagination-controls">
-        <button class="page-btn" [disabled]="currentPageIndex === 0 || isLoading" (click)="prevPage()">&lt; Anterior</button>
+        <button class="page-btn" [disabled]="currentPageIndex === 0 || isLoading" (click)="prevPage()">&lt;
+          Anterior</button>
         <button class="page-btn" [disabled]="!hasMore || isLoading" (click)="nextPage()">Siguiente &gt;</button>
       </div>
     </div>
@@ -122,7 +124,8 @@
           <div class="form-group qty-col">
             <input type="number" [(ngModel)]="item.quantity" placeholder="Cant" min="1" class="form-control">
           </div>
-          <button class="remove-item-btn" (click)="removeItem(idx)" [disabled]="selectedItems.length <= 1">&times;</button>
+          <button class="remove-item-btn" (click)="removeItem(idx)"
+            [disabled]="selectedItems.length <= 1">&times;</button>
         </div>
         <button class="btn-secondary add-item-btn" (click)="addItem()">+ Agregar Ítem</button>
       </div>
@@ -152,8 +155,8 @@
         <label for="invStatus">Estado</label>
         <select id="invStatus" [(ngModel)]="newStatus" class="form-control">
           <option value="Pendiente">Pendiente</option>
-          <option value="Enviada">Enviada</option>
-          <option value="Pagada">Pagada</option>
+          <option value="Enviado">Enviado</option>
+          <option value="Pagado">Pagado</option>
         </select>
       </div>
       <div class="error-message" *ngIf="statusError">
@@ -177,10 +180,12 @@
       <button class="close-btn" (click)="closeDetailModal()">&times;</button>
     </div>
     <div class="modal-body" *ngIf="selectedInvoice">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; background-color: #f8fafc; padding: 16px; border-radius: 8px;">
+      <div
+        style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; background-color: #f8fafc; padding: 16px; border-radius: 8px;">
         <div><strong>Emisión:</strong> {{ selectedInvoice.issueDate | date:'dd/MM/yyyy' }}</div>
         <div><strong>Vencimiento:</strong> {{ selectedInvoice.dueDate | date:'dd/MM/yyyy' }}</div>
-        <div *ngIf="selectedInvoice.paymentDate"><strong>Pago:</strong> {{ selectedInvoice.paymentDate | date:'dd/MM/yyyy' }}</div>
+        <div *ngIf="selectedInvoice.paymentDate"><strong>Pago:</strong> {{ selectedInvoice.paymentDate |
+          date:'dd/MM/yyyy' }}</div>
         <div><strong>Estado:</strong> {{ selectedInvoice.status }}</div>
         <div><strong>Tasa IVA:</strong> {{ selectedInvoice.vatRate }}%</div>
       </div>
@@ -207,10 +212,12 @@
         </table>
       </div>
 
-      <div style="margin-top: 20px; text-align: right; border-top: 1px solid #eaedf1; padding-top: 15px; font-size: 14px; line-height: 1.6;">
+      <div
+        style="margin-top: 20px; text-align: right; border-top: 1px solid #eaedf1; padding-top: 15px; font-size: 14px; line-height: 1.6;">
         <div>Total Neto: <strong>€ {{ selectedInvoice.totalNet | number:'1.2-2' }}</strong></div>
         <div>Total IVA: <strong>€ {{ selectedInvoice.totalVat | number:'1.2-2' }}</strong></div>
-        <div style="font-size: 16px; margin-top: 5px; color: #1a6ff8;">Total Bruto: <strong>€ {{ selectedInvoice.totalGross | number:'1.2-2' }}</strong></div>
+        <div style="font-size: 16px; margin-top: 5px; color: #1a6ff8;">Total Bruto: <strong>€ {{
+            selectedInvoice.totalGross | number:'1.2-2' }}</strong></div>
       </div>
     </div>
     <div class="modal-footer">
@@ -218,4 +225,3 @@
     </div>
   </div>
 </div>
-
