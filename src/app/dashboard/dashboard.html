@@ -1,108 +1,336 @@
 <div class="dashboard-container">
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
   <header class="dashboard-header">
     <div class="welcome-text">
-      <h1>Resumen General</h1>
-      <p>Monitoreo en tiempo real de comprobantes y operaciones.</p>
+      <h1>Panel de Control</h1>
+      <p>Estadísticas y reportes de rendimiento de la empresa.</p>
     </div>
     <div class="date-badge">
-      <span>Hoy: 26 de Mayo, 2026</span>
+      <span class="date-icon">📅</span>
+      <span>{{ today }}</span>
     </div>
   </header>
 
-  <section class="metrics-grid">
-    <div class="metric-card">
-      <div class="card-icon status-blue">
-        <i class="icon">📄</i>
+  <!-- ── Tabs ───────────────────────────────────────────────────────────── -->
+  <nav class="tab-nav" role="tablist">
+    <button
+      id="tab-sales"
+      role="tab"
+      [class.active]="activeTab === 'sales'"
+      (click)="setTab('sales')"
+      class="tab-btn">
+      <span class="tab-icon">📊</span>
+      Ventas
+    </button>
+    <button
+      id="tab-taxes"
+      role="tab"
+      [class.active]="activeTab === 'taxes'"
+      (click)="setTab('taxes')"
+      class="tab-btn">
+      <span class="tab-icon">🧾</span>
+      Impuestos
+    </button>
+    <button
+      id="tab-product"
+      role="tab"
+      [class.active]="activeTab === 'product'"
+      (click)="setTab('product')"
+      class="tab-btn">
+      <span class="tab-icon">📦</span>
+      Producto
+    </button>
+  </nav>
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ── SALES TAB ─────────────────────────────────────────────────────── -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'sales') {
+    <!-- Date selector -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="sales-year">Año</label>
+        <select id="sales-year" [(ngModel)]="selectedYear" (change)="onDateChange()" class="filter-select">
+          @for (y of years; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
       </div>
-      <div class="card-content">
-        <h3>Comprobantes Emitidos</h3>
-        <p class="number">148</p>
-        <span class="trend positive">↑ 8.3% vs semana anterior</span>
+      <div class="filter-group">
+        <label for="sales-month">Mes</label>
+        <select id="sales-month" [(ngModel)]="selectedMonth" (change)="onDateChange()" class="filter-select">
+          @for (m of months; track m.value) {
+            <option [value]="m.value">{{ m.name }}</option>
+          }
+        </select>
       </div>
+      <button class="btn-refresh" (click)="loadSales()" [disabled]="loadingSales">
+        @if (loadingSales) { <span class="spinner"></span> } @else { 🔄 }
+        Actualizar
+      </button>
     </div>
 
-    <div class="metric-card">
-      <div class="card-icon status-green">
-        <i class="icon">💰</i>
+    <!-- Loading / Error -->
+    @if (loadingSales) {
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos de ventas…</p>
       </div>
-      <div class="card-content">
-        <h3>Total Facturado</h3>
-        <p class="number">S/ 24,850.00</p>
-        <span class="trend positive">↑ 12.5% este mes</span>
+    } @else if (errorSales) {
+      <div class="error-banner">⚠️ {{ errorSales }}</div>
+    } @else if (salesData) {
+      <!-- KPI Cards -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="card-icon status-indigo">📈</div>
+          <div class="card-content">
+            <h3>Ventas Netas (Año {{ salesData.year }})</h3>
+            <p class="number">{{ formatCurrency(salesData.totalNetSalesYear) }}</p>
+            <span class="label-sub">Total neto del año</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-cyan">💳</div>
+          <div class="card-content">
+            <h3>Ventas Brutas (Año {{ salesData.year }})</h3>
+            <p class="number">{{ formatCurrency(salesData.totalGrossSalesYear) }}</p>
+            <span class="label-sub">Total bruto del año</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-green">📅</div>
+          <div class="card-content">
+            <h3>Ventas Netas ({{ monthName(salesData.month) }})</h3>
+            <p class="number">{{ formatCurrency(salesData.totalNetSalesMonth) }}</p>
+            <span class="label-sub">Total neto del mes</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-amber">💰</div>
+          <div class="card-content">
+            <h3>Ventas Brutas ({{ monthName(salesData.month) }})</h3>
+            <p class="number">{{ formatCurrency(salesData.totalGrossSalesMonth) }}</p>
+            <span class="label-sub">Total bruto del mes</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Ventas por Mes — {{ salesData.year }}</h3>
+            <span class="chart-badge">Anual</span>
+          </div>
+          <app-bar-chart [data]="salesYearlyChart" [height]="240" [currency]="true" />
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Ventas por Día — {{ monthName(salesData.month) }} {{ salesData.year }}</h3>
+            <span class="chart-badge">Mensual</span>
+          </div>
+          <app-bar-chart [data]="salesMonthlyChart" [height]="240" [currency]="true" />
+        </div>
       </div>
+    }
+  }
+
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ── TAXES TAB ─────────────────────────────────────────────────────── -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'taxes') {
+    <!-- Date selector -->
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label for="tax-year">Año</label>
+        <select id="tax-year" [(ngModel)]="selectedYear" (change)="onDateChange()" class="filter-select">
+          @for (y of years; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="tax-month">Mes</label>
+        <select id="tax-month" [(ngModel)]="selectedMonth" (change)="onDateChange()" class="filter-select">
+          @for (m of months; track m.value) {
+            <option [value]="m.value">{{ m.name }}</option>
+          }
+        </select>
+      </div>
+      <button class="btn-refresh" (click)="loadTax()" [disabled]="loadingTax">
+        @if (loadingTax) { <span class="spinner"></span> } @else { 🔄 }
+        Actualizar
+      </button>
     </div>
 
-    <div class="metric-card">
-      <div class="card-icon status-amber">
-        <i class="icon">👥</i>
+    @if (loadingTax) {
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos de impuestos…</p>
       </div>
-      <div class="card-content">
-        <h3>Clientes Activos</h3>
-        <p class="number">32</p>
-        <span class="trend neutral">Sin cambios recientes</span>
-      </div>
-    </div>
-  </section>
+    } @else if (errorTax) {
+      <div class="error-banner">⚠️ {{ errorTax }}</div>
+    } @else if (taxData) {
+      <!-- KPI Cards -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="card-icon status-amber">🏦</div>
+          <div class="card-content">
+            <h3>Impuestos Totales ({{ taxData.year }})</h3>
+            <p class="number">{{ formatCurrency(taxData.totalTaxesYear) }}</p>
+            <span class="label-sub">Total recaudado en el año</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-red">📋</div>
+          <div class="card-content">
+            <h3>Impuestos ({{ monthName(taxData.month) }})</h3>
+            <p class="number">{{ formatCurrency(taxData.totalTaxesMonth) }}</p>
+            <span class="label-sub">Total del mes seleccionado</span>
+          </div>
+        </div>
+      </section>
 
-  <section class="dashboard-middle">
-    <div class="chart-container">
-      <h3>Actividad de Ventas (Últimos 5 meses)</h3>
-      <div class="mock-chart">
-        <div class="bar" style="height: 40%;"><span>Ene</span></div>
-        <div class="bar" style="height: 60%;"><span>Feb</span></div>
-        <div class="bar" style="height: 55%;"><span>Mar</span></div>
-        <div class="bar" style="height: 85%;"><span>Abr</span></div>
-        <div class="bar" style="height: 95px; min-height: 75%;"><span>May</span></div>
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Impuestos por Mes — {{ taxData.year }}</h3>
+            <span class="chart-badge">Anual</span>
+          </div>
+          <app-bar-chart [data]="taxYearlyChart" [height]="240" [currency]="true" />
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Impuestos Diarios — {{ monthName(taxData.month) }} {{ taxData.year }}</h3>
+            <span class="chart-badge">Mensual</span>
+          </div>
+          <app-bar-chart [data]="taxMonthlyChart" [height]="240" [currency]="true" />
+        </div>
       </div>
-    </div>
-  </section>
+    }
+  }
 
-  <section class="table-container">
-    <div class="table-header">
-      <h3>Últimos Comprobantes Operados</h3>
-      <button class="btn-view-all">Ver todos</button>
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  <!-- ── PRODUCT TAB ───────────────────────────────────────────────────── -->
+  <!-- ═══════════════════════════════════════════════════════════════════ -->
+  @if (activeTab === 'product') {
+    <!-- Selectors -->
+    <div class="filter-bar filter-bar--wrap">
+      <div class="filter-group filter-group--wide">
+        <label for="product-select">Producto</label>
+        @if (loadingProducts) {
+          <div class="select-loading">Cargando productos…</div>
+        } @else {
+          <select id="product-select" [(ngModel)]="selectedProductId" (change)="onProductChange()" class="filter-select filter-select--product">
+            @if (!products.length) {
+              <option [value]="null">Sin productos</option>
+            }
+            @for (p of products; track p.productId) {
+              <option [value]="p.productId">{{ p.description }} — S/ {{ p.netPrice.toFixed(2) }}</option>
+            }
+          </select>
+        }
+      </div>
+      <div class="filter-group">
+        <label for="prod-year">Año</label>
+        <select id="prod-year" [(ngModel)]="productYear" (change)="onProductDateChange()" class="filter-select">
+          @for (y of years; track y) {
+            <option [value]="y">{{ y }}</option>
+          }
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="prod-month">Mes</label>
+        <select id="prod-month" [(ngModel)]="productMonth" (change)="onProductDateChange()" class="filter-select">
+          @for (m of months; track m.value) {
+            <option [value]="m.value">{{ m.name }}</option>
+          }
+        </select>
+      </div>
+      <button class="btn-refresh" (click)="loadProduct()" [disabled]="loadingProduct || !selectedProductId">
+        @if (loadingProduct) { <span class="spinner"></span> } @else { 🔄 }
+        Actualizar
+      </button>
     </div>
-    
-    <table class="custom-table">
-      <thead>
-        <tr>
-          <th>Nro. Comprobante</th>
-          <th>Cliente</th>
-          <th>Fecha Emisión</th>
-          <th>Total</th>
-          <th>Estado</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><strong>F001-00004321</strong></td>
-          <td>Distribuidora Norte Sac</td>
-          <td>26/05/2026</td>
-          <td>S/ 4,200.00</td>
-          <td><span class="badge badge-success">Aceptado</span></td>
-        </tr>
-        <tr>
-          <td><strong>F001-00004320</strong></td>
-          <td>Inversiones Perú J&M</td>
-          <td>25/05/2026</td>
-          <td>S/ 1,850.00</td>
-          <td><span class="badge badge-success">Aceptado</span></td>
-        </tr>
-        <tr>
-          <td><strong>B001-00009812</strong></td>
-          <td>Juan Carlos Mendoza</td>
-          <td>25/05/2026</td>
-          <td>S/ 320.00</td>
-          <td><span class="badge badge-warning">Pendiente</span></td>
-        </tr>
-        <tr>
-          <td><strong>F001-00004319</strong></td>
-          <td>Corporación Textil S.A.</td>
-          <td>24/05/2026</td>
-          <td>S/ 12,500.00</td>
-          <td><span class="badge badge-success">Aceptado</span></td>
-        </tr>
-      </tbody>
-    </table>
-  </section>
+
+    @if (loadingProduct) {
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <p>Cargando datos del producto…</p>
+      </div>
+    } @else if (errorProduct) {
+      <div class="error-banner">⚠️ {{ errorProduct }}</div>
+    } @else if (!selectedProductId) {
+      <div class="empty-state">
+        <span class="empty-icon">📦</span>
+        <p>Selecciona un producto para ver su reporte.</p>
+      </div>
+    } @else if (productData) {
+      <!-- Product info banner -->
+      <div class="product-banner">
+        <div class="product-banner-info">
+          <h2>{{ productData.description }}</h2>
+          <span class="product-price">Precio actual: {{ formatCurrency(productData.currentNetPrice) }}</span>
+        </div>
+        <div class="product-banner-id">ID #{{ productData.productId }}</div>
+      </div>
+
+      <!-- KPI Cards -->
+      <section class="metrics-grid">
+        <div class="metric-card">
+          <div class="card-icon status-green">🔢</div>
+          <div class="card-content">
+            <h3>Cantidad Vendida ({{ productData.year }})</h3>
+            <p class="number">{{ productData.totalQuantityYear | number:'1.0-2' }}</p>
+            <span class="label-sub">Unidades en el año</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-indigo">💵</div>
+          <div class="card-content">
+            <h3>Ventas Netas ({{ productData.year }})</h3>
+            <p class="number">{{ formatCurrency(productData.totalNetSalesYear) }}</p>
+            <span class="label-sub">Total anual</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-cyan">📆</div>
+          <div class="card-content">
+            <h3>Cantidad ({{ monthName(productData.month) }})</h3>
+            <p class="number">{{ productData.totalQuantityMonth | number:'1.0-2' }}</p>
+            <span class="label-sub">Unidades del mes</span>
+          </div>
+        </div>
+        <div class="metric-card">
+          <div class="card-icon status-amber">💰</div>
+          <div class="card-content">
+            <h3>Ventas Netas ({{ monthName(productData.month) }})</h3>
+            <p class="number">{{ formatCurrency(productData.totalNetSalesMonth) }}</p>
+            <span class="label-sub">Total del mes</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Ventas por Mes — {{ productData.year }}</h3>
+            <span class="chart-badge">Anual</span>
+          </div>
+          <app-bar-chart [data]="productYearlyChart" [height]="240" />
+        </div>
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <h3>Ventas por Día — {{ monthName(productData.month) }} {{ productData.year }}</h3>
+            <span class="chart-badge">Mensual</span>
+          </div>
+          <app-bar-chart [data]="productDailyChart" [height]="240" />
+        </div>
+      </div>
+    }
+  }
+
 </div>
