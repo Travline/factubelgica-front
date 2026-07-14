@@ -1,0 +1,103 @@
+/* Contenedor principal que ocupa toda la pantalla */
+.admin-container {
+  display: flex;
+  height: 100vh;
+  background-color: #f1f5f9;
+  font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  overflow: hidden;
+}
+
+/* El menú lateral oscuro */
+.sidebar {
+  width: 260px;
+  background-color: #0f172a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+}
+
+.brand {
+  padding: 25px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid #1e293b;
+}
+
+.logo-box {
+  width: 24px;
+  height: 24px;
+  background-color: #00e0b8;
+  transform: rotate(45deg);
+  border-radius: 6px;
+}
+
+.brand h2 {
+  font-size: 20px;
+  margin: 0;
+  font-weight: 600;
+}
+
+/* Opciones del menú */
+.menu {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+}
+
+.menu-item {
+  padding: 16px 24px;
+  color: #94a3b8;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.menu-item:hover {
+  background-color: #1e293b;
+  color: white;
+}
+
+.menu-item.active {
+  background-color: #1e293b;
+  color: #3b82f6; /* Texto azul cuando está activo */
+  border-left: 4px solid #3b82f6;
+}
+
+/* El área derecha */
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* La barra superior blanca */
+.topbar {
+  height: 70px;
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 30px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.topbar h2 {
+  font-size: 22px;
+  color: #1e293b;
+  margin: 0;
+}
+
+.user-info {
+  font-weight: 600;
+  color: #475569;
+}
+
+/* Donde va a cargar el Dashboard */
+.content-area {
+  padding: 30px;
+  flex: 1;
+  overflow-y: auto;
+}

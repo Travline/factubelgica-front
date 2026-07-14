@@ -1,0 +1,347 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OpenAPI definition - Admin Dashboard Controller",
+    "version": "v0"
+  },
+  "servers": [
+    {
+      "url": "https://factubelgica.onrender.com",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/a-role/dashboard/taxes": {
+      "get": {
+        "tags": [
+          "admin-dashboard-controller"
+        ],
+        "operationId": "getTaxReport",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/a-role/dashboard/sales": {
+      "get": {
+        "tags": [
+          "admin-dashboard-controller"
+        ],
+        "operationId": "getSalesReport",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SalesReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/a-role/dashboard/products/{id}": {
+      "get": {
+        "tags": [
+          "admin-dashboard-controller"
+        ],
+        "operationId": "getProductSalesReport",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "month",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductSalesReportResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "DailyTaxMetric": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taxAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "MonthlyTaxMetric": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "taxAmount": {
+            "type": "number"
+          }
+        }
+      },
+      "TaxReportResponse": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalTaxesYear": {
+            "type": "number"
+          },
+          "totalTaxesMonth": {
+            "type": "number"
+          },
+          "yearlyTaxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyTaxMetric"
+            }
+          },
+          "monthlyTaxes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyTaxMetric"
+            }
+          }
+        }
+      },
+      "DailySalesMetric": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "netSales": {
+            "type": "number"
+          },
+          "grossSales": {
+            "type": "number"
+          }
+        }
+      },
+      "MonthlySalesMetric": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "netSales": {
+            "type": "number"
+          },
+          "grossSales": {
+            "type": "number"
+          }
+        }
+      },
+      "SalesReportResponse": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalNetSalesYear": {
+            "type": "number"
+          },
+          "totalGrossSalesYear": {
+            "type": "number"
+          },
+          "totalNetSalesMonth": {
+            "type": "number"
+          },
+          "totalGrossSalesMonth": {
+            "type": "number"
+          },
+          "yearlySales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlySalesMetric"
+            }
+          },
+          "monthlySales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailySalesMetric"
+            }
+          }
+        }
+      },
+      "DailyProductSalesMetric": {
+        "type": "object",
+        "properties": {
+          "day": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "netSales": {
+            "type": "number"
+          }
+        }
+      },
+      "MonthlyProductSalesMetric": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "netSales": {
+            "type": "number"
+          }
+        }
+      },
+      "ProductSalesReportResponse": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "month": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "productId": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
+          "currentNetPrice": {
+            "type": "number"
+          },
+          "totalQuantityYear": {
+            "type": "number"
+          },
+          "totalNetSalesYear": {
+            "type": "number"
+          },
+          "totalQuantityMonth": {
+            "type": "number"
+          },
+          "totalNetSalesMonth": {
+            "type": "number"
+          },
+          "monthlySales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyProductSalesMetric"
+            }
+          },
+          "dailySales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyProductSalesMetric"
+            }
+          }
+        }
+      }
+    }
+  }
+}

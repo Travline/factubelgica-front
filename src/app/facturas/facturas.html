@@ -1,0 +1,221 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Facturas</h1>
+    <button (click)="openCreateModal()" class="btn-primary">+ Nueva Factura</button>
+  </header>
+
+  <div class="content-card">
+    
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="icon-search">🔍</span>
+        <input type="text" placeholder="Buscar factura...">
+      </div>
+      <div class="filters">
+        <select class="filter-dropdown">
+          <option>Estado: Todos</option>
+        </select>
+        <select class="filter-dropdown">
+          <option>Fecha: Todos</option>
+        </select>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Número</th>
+          <th>Emisión</th>
+          <th>Vencimiento</th>
+          <th>Total Bruto</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let invoice of invoices">
+          <td>FAC-{{ invoice.invoiceNumber }}</td>
+          <td>{{ invoice.issueDate | date:'dd/MM/yyyy' }}</td>
+          <td>{{ invoice.dueDate | date:'dd/MM/yyyy' }}</td>
+          <td>€ {{ invoice.totalGross | number:'1.2-2' }}</td>
+          <td>
+            <span class="badge" [ngClass]="{
+              'badge-pagada': invoice.status.toLowerCase() === 'pagada' || invoice.status.toLowerCase() === 'paid',
+              'badge-enviada': invoice.status.toLowerCase() === 'enviada' || invoice.status.toLowerCase() === 'sent',
+              'badge-pendiente': invoice.status.toLowerCase() === 'pendiente' || invoice.status.toLowerCase() === 'pending'
+            }">
+              {{ invoice.status }}
+            </span>
+          </td>
+          <td class="actions">
+            <!-- View Detail Action -->
+            <button title="Ver Detalle" (click)="openDetailModal(invoice)" class="action-btn">👁️</button>
+            <!-- Update Status Action -->
+            <button title="Cambiar Estado" (click)="openStatusModal(invoice)" class="action-btn">⚙️</button>
+            <!-- Delete Action -->
+            <button title="Eliminar" (click)="deleteInvoice(invoice.invoiceId)" class="action-btn delete-btn">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="invoices.length === 0 && !isLoading">
+          <td colspan="6" style="text-align: center; color: #637381; padding: 30px;">
+            No se encontraron facturas.
+          </td>
+        </tr>
+        <tr *ngIf="isLoading">
+          <td colspan="6" style="text-align: center; color: #637381; padding: 30px;">
+            Cargando facturas...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-section">
+      <span class="page-info">Página {{ currentPageIndex + 1 }}</span>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="currentPageIndex === 0 || isLoading" (click)="prevPage()">&lt; Anterior</button>
+        <button class="page-btn" [disabled]="!hasMore || isLoading" (click)="nextPage()">Siguiente &gt;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal para Crear Factura -->
+<div class="modal-overlay" *ngIf="showCreateModal">
+  <div class="modal-container modal-large">
+    <div class="modal-header">
+      <h2>Nueva Factura</h2>
+      <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="invClient">Cliente *</label>
+        <select id="invClient" [(ngModel)]="selectedClientId" class="form-control">
+          <option [ngValue]="null" disabled>Seleccione un cliente</option>
+          <option *ngFor="let client of clientsList" [ngValue]="client.clientId">
+            {{ client.legalName }} (ID: {{ client.clientId }})
+          </option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group col">
+          <label for="invDue">Fecha Vencimiento *</label>
+          <input id="invDue" type="date" [(ngModel)]="dueDate" class="form-control">
+        </div>
+        <div class="form-group col">
+          <label for="invVat">Tasa de IVA (%) *</label>
+          <input id="invVat" type="number" [(ngModel)]="vatRate" placeholder="21" class="form-control">
+        </div>
+      </div>
+
+      <div class="items-section">
+        <h3>Productos / Ítems *</h3>
+        <div *ngFor="let item of selectedItems; let idx = index" class="item-row">
+          <div class="form-group select-col">
+            <select [(ngModel)]="item.productId" class="form-control">
+              <option [ngValue]="0" disabled>Seleccione Producto</option>
+              <option *ngFor="let prod of productsList" [ngValue]="prod.productId">
+                {{ prod.description }} (€ {{ prod.netPrice | number:'1.2-2' }})
+              </option>
+            </select>
+          </div>
+          <div class="form-group qty-col">
+            <input type="number" [(ngModel)]="item.quantity" placeholder="Cant" min="1" class="form-control">
+          </div>
+          <button class="remove-item-btn" (click)="removeItem(idx)" [disabled]="selectedItems.length <= 1">&times;</button>
+        </div>
+        <button class="btn-secondary add-item-btn" (click)="addItem()">+ Agregar Ítem</button>
+      </div>
+
+      <div class="error-message" *ngIf="createError">
+        {{ createError }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeCreateModal()" [disabled]="isCreating">Cancelar</button>
+      <button class="btn-primary" (click)="createInvoice()" [disabled]="isCreating">
+        {{ isCreating ? 'Creando Factura...' : 'Crear Factura' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Actualizar Estado -->
+<div class="modal-overlay" *ngIf="showStatusModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Actualizar Estado de Factura</h2>
+      <button class="close-btn" (click)="closeStatusModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="invStatus">Estado</label>
+        <select id="invStatus" [(ngModel)]="newStatus" class="form-control">
+          <option value="Pendiente">Pendiente</option>
+          <option value="Enviada">Enviada</option>
+          <option value="Pagada">Pagada</option>
+        </select>
+      </div>
+      <div class="error-message" *ngIf="statusError">
+        {{ statusError }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeStatusModal()" [disabled]="isUpdatingStatus">Cancelar</button>
+      <button class="btn-primary" (click)="updateStatus()" [disabled]="isUpdatingStatus">
+        {{ isUpdatingStatus ? 'Actualizando...' : 'Guardar Estado' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para Ver Detalle de Factura -->
+<div class="modal-overlay" *ngIf="showDetailModal">
+  <div class="modal-container modal-large">
+    <div class="modal-header">
+      <h2>Detalle de Factura FAC-{{ selectedInvoice?.invoiceNumber }}</h2>
+      <button class="close-btn" (click)="closeDetailModal()">&times;</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedInvoice">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 20px; background-color: #f8fafc; padding: 16px; border-radius: 8px;">
+        <div><strong>Emisión:</strong> {{ selectedInvoice.issueDate | date:'dd/MM/yyyy' }}</div>
+        <div><strong>Vencimiento:</strong> {{ selectedInvoice.dueDate | date:'dd/MM/yyyy' }}</div>
+        <div *ngIf="selectedInvoice.paymentDate"><strong>Pago:</strong> {{ selectedInvoice.paymentDate | date:'dd/MM/yyyy' }}</div>
+        <div><strong>Estado:</strong> {{ selectedInvoice.status }}</div>
+        <div><strong>Tasa IVA:</strong> {{ selectedInvoice.vatRate }}%</div>
+      </div>
+
+      <div class="detail-items-section">
+        <h3 style="margin-top: 0; font-size: 16px; font-weight: 600; color: #1e293b;">Ítems de Factura</h3>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px;">
+          <thead>
+            <tr style="border-bottom: 2px solid #eaedf1; text-align: left; color: #64748b;">
+              <th style="padding: 8px 0;">Producto</th>
+              <th style="padding: 8px 0; text-align: center;">Cantidad</th>
+              <th style="padding: 8px 0; text-align: right;">Precio Unitario</th>
+              <th style="padding: 8px 0; text-align: right;">Total Línea</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of selectedInvoice.items" style="border-bottom: 1px solid #eaedf1;">
+              <td style="padding: 10px 0;">{{ item.description || 'Producto #' + item.productId }}</td>
+              <td style="padding: 10px 0; text-align: center;">{{ item.quantity }}</td>
+              <td style="padding: 10px 0; text-align: right;">€ {{ item.netPrice | number:'1.2-2' }}</td>
+              <td style="padding: 10px 0; text-align: right;">€ {{ item.lineTotal | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top: 20px; text-align: right; border-top: 1px solid #eaedf1; padding-top: 15px; font-size: 14px; line-height: 1.6;">
+        <div>Total Neto: <strong>€ {{ selectedInvoice.totalNet | number:'1.2-2' }}</strong></div>
+        <div>Total IVA: <strong>€ {{ selectedInvoice.totalVat | number:'1.2-2' }}</strong></div>
+        <div style="font-size: 16px; margin-top: 5px; color: #1a6ff8;">Total Bruto: <strong>€ {{ selectedInvoice.totalGross | number:'1.2-2' }}</strong></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" (click)="closeDetailModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+

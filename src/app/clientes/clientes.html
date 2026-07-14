@@ -1,0 +1,157 @@
+<div class="page-container">
+  <header class="page-header">
+    <div>
+      <h1>Directorio de Clientes</h1>
+      <p>Gestiona la información de las personas y empresas a las que facturas.</p>
+    </div>
+    <button (click)="openCreateModal()" class="btn-primary">
+      <span class="icon">+</span> Nuevo Cliente
+    </button>
+  </header>
+
+  <section class="toolbar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input type="text" placeholder="Buscar por DNI, RUC o Nombre...">
+    </div>
+    <div class="filters">
+      <select class="filter-select">
+        <option value="todos">Todos los estados</option>
+        <option value="activos">Activos</option>
+        <option value="inactivos">Inactivos</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="table-container">
+    <table class="custom-table">
+      <thead>
+        <tr>
+          <th>Documento</th>
+          <th>Razón Social / Nombre</th>
+          <th>Correo Electrónico</th>
+          <th>Teléfono</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let client of clients">
+          <td><strong>{{ client.vatNumber }}</strong></td>
+          <td>{{ client.legalName }}</td>
+          <td>{{ client.email || '—' }}</td>
+          <td>{{ client.phone || '—' }}</td>
+          <td>
+            <span class="badge" [ngClass]="client.active ? 'badge-success' : 'badge-inactive'">
+              {{ client.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td>
+            <button class="btn-action" title="Editar" (click)="openEditModal(client)">✏️</button>
+          </td>
+        </tr>
+        <tr *ngIf="clients.length === 0 && !isLoading">
+          <td colspan="6" style="text-align: center; color: #666; padding: 30px;">
+            No se encontraron clientes.
+          </td>
+        </tr>
+        <tr *ngIf="isLoading">
+          <td colspan="6" style="text-align: center; color: #666; padding: 30px;">
+            Cargando clientes...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-section">
+      <span class="page-info">Página {{ currentPageIndex + 1 }}</span>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="currentPageIndex === 0 || isLoading" (click)="prevPage()">&lt; Anterior</button>
+        <button class="page-btn" [disabled]="!hasMore || isLoading" (click)="nextPage()">Siguiente &gt;</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Modal Crear Cliente -->
+<div class="modal-overlay" *ngIf="showCreateModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Nuevo Cliente</h2>
+      <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="vatNum">Documento (RUC / DNI) *</label>
+        <input id="vatNum" type="text" [(ngModel)]="newVatNumber" placeholder="Ej. RUC 20123456789" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="legName">Razón Social / Nombre Completo *</label>
+        <input id="legName" type="text" [(ngModel)]="newLegalName" placeholder="Ej. Inversiones Perú S.A.C." class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="cEmail">Correo Electrónico</label>
+        <input id="cEmail" type="email" [(ngModel)]="newEmail" placeholder="contacto@empresa.com" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="cAddress">Dirección</label>
+        <input id="cAddress" type="text" [(ngModel)]="newAddress" placeholder="Av. Principal 123, Lima" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="cPhone">Teléfono</label>
+        <input id="cPhone" type="text" [(ngModel)]="newPhone" placeholder="987 654 321" class="form-control">
+      </div>
+      <div class="error-message" *ngIf="createError">
+        {{ createError }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeCreateModal()" [disabled]="isCreating">Cancelar</button>
+      <button class="btn-primary" (click)="createClient()" [disabled]="isCreating">
+        {{ isCreating ? 'Registrando...' : 'Registrar Cliente' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Cliente -->
+<div class="modal-overlay" *ngIf="showEditModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Editar Cliente</h2>
+      <button class="close-btn" (click)="closeEditModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="editLegName">Razón Social / Nombre Completo *</label>
+        <input id="editLegName" type="text" [(ngModel)]="editLegalName" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="editEmail">Correo Electrónico</label>
+        <input id="editEmail" type="email" [(ngModel)]="editEmail" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="editAddress">Dirección</label>
+        <input id="editAddress" type="text" [(ngModel)]="editAddress" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="editPhone">Teléfono</label>
+        <input id="editPhone" type="text" [(ngModel)]="editPhone" class="form-control">
+      </div>
+      <div class="form-group form-group-checkbox">
+        <label class="checkbox-label">
+          <input type="checkbox" [(ngModel)]="editActive"> Cliente Activo
+        </label>
+      </div>
+      <div class="error-message" *ngIf="editError">
+        {{ editError }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeEditModal()" [disabled]="isUpdating">Cancelar</button>
+      <button class="btn-primary" (click)="updateClient()" [disabled]="isUpdating">
+        {{ isUpdating ? 'Guardando...' : 'Guardar Cambios' }}
+      </button>
+    </div>
+  </div>
+</div>

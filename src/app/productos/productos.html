@@ -1,0 +1,106 @@
+<div class="page-container">
+  <header class="page-header">
+    <h1>Productos</h1>
+    <button *ngIf="isAdmin()" (click)="openCreateModal()" class="btn-primary">+ Nuevo Producto</button>
+  </header>
+
+  <div class="content-card">
+    
+    <div class="toolbar">
+      <div class="search-box">
+        <span class="icon-search">🔍</span>
+        <input type="text" placeholder="Buscar producto...">
+      </div>
+      <div class="role-badge">
+        Rol: <span class="badge" [ngClass]="isAdmin() ? 'badge-pagada' : 'badge-pendiente'">{{ authService.currentUser()?.role }}</span>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Descripción</th>
+          <th>Precio Neto</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let product of products">
+          <td>#{{ product.productId }}</td>
+          <td>{{ product.description }}</td>
+          <td>€ {{ product.netPrice | number:'1.2-2' }}</td>
+          <td>
+            <span class="badge" [ngClass]="product.active ? 'badge-pagada' : 'badge-enviada'">
+              {{ product.active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </td>
+          <td class="actions">
+            <!-- View Action (Available for both Admin and User) -->
+            <button title="Ver Detalle" class="action-btn">👁️</button>
+            
+            <!-- Admin Only Actions -->
+            <ng-container *ngIf="isAdmin()">
+              <button title="Editar (Admin)" class="action-btn">✏️</button>
+              <button title="Eliminar (Admin)" class="action-btn">🗑️</button>
+            </ng-container>
+
+            <!-- User Only Indicator if not admin -->
+            <ng-container *ngIf="!isAdmin()">
+              <span class="badge badge-read-only">Solo Lectura</span>
+            </ng-container>
+          </td>
+        </tr>
+        <tr *ngIf="products.length === 0 && !isLoading">
+          <td colspan="5" style="text-align: center; color: #637381; padding: 30px;">
+            No se encontraron productos.
+          </td>
+        </tr>
+        <tr *ngIf="isLoading">
+          <td colspan="5" style="text-align: center; color: #637381; padding: 30px;">
+            Cargando productos...
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="pagination-section">
+      <span class="page-info">Página {{ currentPageIndex + 1 }}</span>
+      <div class="pagination-controls">
+        <button class="page-btn" [disabled]="currentPageIndex === 0 || isLoading" (click)="prevPage()">&lt; Anterior</button>
+        <button class="page-btn" [disabled]="!hasMore || isLoading" (click)="nextPage()">Siguiente &gt;</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal para Crear Producto (Admin Only) -->
+<div class="modal-overlay" *ngIf="showCreateModal">
+  <div class="modal-container">
+    <div class="modal-header">
+      <h2>Nuevo Producto</h2>
+      <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="prodDesc">Descripción</label>
+        <input id="prodDesc" type="text" [(ngModel)]="newProductDescription" placeholder="Ej. Impresora Láser Bélgica" class="form-control">
+      </div>
+      <div class="form-group">
+        <label for="prodPrice">Precio Neto (€)</label>
+        <input id="prodPrice" type="number" [(ngModel)]="newProductPrice" placeholder="0.00" class="form-control">
+      </div>
+      <div class="error-message" *ngIf="createError">
+        {{ createError }}
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="closeCreateModal()" [disabled]="isCreating">Cancelar</button>
+      <button class="btn-primary" (click)="createProduct()" [disabled]="isCreating">
+        {{ isCreating ? 'Guardando...' : 'Crear Producto' }}
+      </button>
+    </div>
+  </div>
+</div>
