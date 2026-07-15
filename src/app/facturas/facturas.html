@@ -102,7 +102,8 @@
       <div class="form-row">
         <div class="form-group col">
           <label for="invDue">Fecha Vencimiento *</label>
-          <input id="invDue" type="date" min="2026-07-15" [(ngModel)]="dueDate" class="form-control">
+          <input id="invDue" type="date" min="2026-07-15" (keydown)="$event.preventDefault()" [(ngModel)]="dueDate"
+            class="form-control">
         </div>
         <div class="form-group col">
           <label for="invVat">Tasa de IVA (%) *</label>
