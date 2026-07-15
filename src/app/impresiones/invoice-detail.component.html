@@ -72,7 +72,7 @@
         </div>
         <div class="total-row grand-total">
           <span>TOTAL:</span>
-          <span>${{ invoice.totalGross / 100 | number:'1.2-2' }}</span>
+          <span>${{ invoice.totalNet + (invoice.totalVat / 100) | number:'1.2-2' }}</span>
         </div>
       </div>
     </footer>
