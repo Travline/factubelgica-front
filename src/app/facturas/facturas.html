@@ -215,9 +215,9 @@
       <div
         style="margin-top: 20px; text-align: right; border-top: 1px solid #eaedf1; padding-top: 15px; font-size: 14px; line-height: 1.6;">
         <div>Total Neto: <strong>€ {{ selectedInvoice.totalNet | number:'1.2-2' }}</strong></div>
-        <div>Total IVA: <strong>€ {{ selectedInvoice.totalVat | number:'1.2-2' }}</strong></div>
+        <div>Total IVA: <strong>€ {{ selectedInvoice.totalVat / 100 | number:'1.2-2' }}</strong></div>
         <div style="font-size: 16px; margin-top: 5px; color: #1a6ff8;">Total Bruto: <strong>€ {{
-            selectedInvoice.totalGross | number:'1.2-2' }}</strong></div>
+            selectedInvoice.totalNet + (selectedInvoice.totalVat / 100) | number:'1.2-2' }}</strong></div>
       </div>
     </div>
     <div class="modal-footer">
