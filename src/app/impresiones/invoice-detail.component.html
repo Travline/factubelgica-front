@@ -1,0 +1,85 @@
+<div class="invoice-page-container">
+  <div class="control-panel no-print" *ngIf="!loading && !error">
+    <button (click)="printInvoice()" class="btn-print">
+      Imprimir o Guardar PDF
+    </button>
+  </div>
+
+  <div *ngIf="loading" class="state-message">Cargando factura...</div>
+  <div *ngIf="error" class="state-message error">{{ error }}</div>
+
+  <div class="invoice-container" *ngIf="invoice">
+
+    <header class="invoice-header">
+      <div class="company-brand">
+        <h1>FactuBelgica</h1>
+        <p class="subtitle">SISTEMA DE FACTURACIÓN</p>
+      </div>
+      <div class="invoice-meta">
+        <h2>FACTURA</h2>
+        <p><strong>Nº:</strong> {{ invoice.invoiceNumber }}</p>
+        <p><strong>Estado:</strong> <span class="badge">{{ invoice.status | uppercase }}</span></p>
+      </div>
+    </header>
+
+    <hr class="divider" />
+
+    <section class="invoice-details">
+      <div class="details-col">
+        <h3>Detalles de Emisión</h3>
+        <p><strong>Fecha de Emisión:</strong> {{ invoice.issueDate | date:'dd/MM/yyyy' }}</p>
+        <p><strong>Fecha de Vencimiento:</strong> {{ invoice.dueDate | date:'dd/MM/yyyy' }}</p>
+        <p *ngIf="invoice.paymentDate"><strong>Fecha de Pago:</strong> {{ invoice.paymentDate | date:'dd/MM/yyyy' }}</p>
+      </div>
+      <div class="details-col align-right">
+        <h3>Identificadores</h3>
+        <p class="uuid-text"><strong>ID Factura:</strong> {{ invoice.invoiceId }}</p>
+        <p><strong>ID Usuario:</strong> {{ invoice.userId }}</p>
+        <p><strong>ID Info:</strong> {{ invoice.infoId }}</p>
+      </div>
+    </section>
+
+    <table class="invoice-table">
+      <thead>
+        <tr>
+          <th>ID Prod.</th>
+          <th>Descripción</th>
+          <th class="text-right">Cant.</th>
+          <th class="text-right">Precio Unit. (Neto)</th>
+          <th class="text-right">Total (Neto)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of invoice.items">
+          <td>{{ item.productId }}</td>
+          <td>{{ item.description || 'Producto #' + item.productId }}</td>
+          <td class="text-right">{{ item.quantity }}</td>
+          <td class="text-right">{{ item.netPrice | number:'1.2-2' }}</td>
+          <td class="text-right">{{ item.lineTotal | number:'1.2-2' }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <footer class="invoice-totals">
+      <div class="totals-wrapper">
+        <div class="total-row">
+          <span>Subtotal Neto:</span>
+          <span>{{ invoice.totalNet | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row">
+          <span>Impuestos (I.G.V / VAT {{ invoice.vatRate * 100 }}%):</span>
+          <span>{{ invoice.totalVat | number:'1.2-2' }}</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>TOTAL:</span>
+          <span>${{ invoice.totalGross | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </footer>
+
+    <div class="invoice-footer-note">
+      <p>Gracias por su preferencia. Documento emitido mediante el proyecto universitario FactuBelgica.</p>
+    </div>
+
+  </div>
+</div>
