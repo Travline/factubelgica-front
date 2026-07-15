@@ -68,11 +68,11 @@
         </div>
         <div class="total-row">
           <span>Impuestos (I.G.V / VAT {{ invoice.vatRate }}%):</span>
-          <span>{{ invoice.totalVat | number:'1.2-2' }}</span>
+          <span>{{ invoice.totalVat / 100 | number:'1.2-2' }}</span>
         </div>
         <div class="total-row grand-total">
           <span>TOTAL:</span>
-          <span>${{ invoice.totalGross | number:'1.2-2' }}</span>
+          <span>${{ invoice.totalGross / 100 | number:'1.2-2' }}</span>
         </div>
       </div>
     </footer>
