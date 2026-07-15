@@ -37,7 +37,7 @@
           <td>FAC-{{ invoice.invoiceNumber }}</td>
           <td>{{ invoice.issueDate | date:'dd/MM/yyyy' }}</td>
           <td>{{ invoice.dueDate | date:'dd/MM/yyyy' }}</td>
-          <td>€ {{ invoice.totalGross | number:'1.2-2' }}</td>
+          <td>€ {{ invoice.totalNet + (invoice.totalVat / 100) | number:'1.2-2' }}</td>
           <td>
             <span class="badge" [ngClass]="{
               'badge-pagada': invoice.status.toLowerCase() === 'pagada' || invoice.status.toLowerCase() === 'paid',
@@ -106,7 +106,7 @@
         </div>
         <div class="form-group col">
           <label for="invVat">Tasa de IVA (%) *</label>
-          <input id="invVat" type="number" [(ngModel)]="vatRate" placeholder="21" class="form-control">
+          <input id="invVat" type="number" min="1" [(ngModel)]="vatRate" placeholder="21" class="form-control">
         </div>
       </div>
 
