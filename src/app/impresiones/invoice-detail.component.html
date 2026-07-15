@@ -61,7 +61,7 @@
     </table>
 
     <footer class="invoice-totals">
-      <div class="totals-wrapper">
+      <div class="totals-wrapper" *ngIf="invoice">
         <div class="total-row">
           <span>Subtotal Neto:</span>
           <span>{{ invoice.totalNet | number:'1.2-2' }}</span>
