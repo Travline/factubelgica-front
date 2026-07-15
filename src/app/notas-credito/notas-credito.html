@@ -1,0 +1,170 @@
+<div class="page-container">
+  <header class="page-header">
+    <div class="page-title">
+      <span class="page-icon">📝</span>
+      <div>
+        <h1>Notas de Crédito</h1>
+        <p>Historial de notas de crédito emitidas. Solo lectura.</p>
+      </div>
+    </div>
+    <div class="readonly-badge">
+      <span class="lock-icon">🔒</span> Solo visualización
+    </div>
+  </header>
+
+  <div class="content-card">
+
+    <!-- ── Table ─────────────────────────────────────────────────────────── -->
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>N.° Nota</th>
+          <th>ID Nota</th>
+          <th>Factura Asociada</th>
+          <th>Fecha Emisión</th>
+          <th>Motivo</th>
+          <th>Creada</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loading row -->
+        @if (isLoading) {
+          <tr>
+            <td colspan="7" class="state-cell">
+              <div class="loading-row">
+                <div class="spinner"></div>
+                <span>Cargando notas de crédito…</span>
+              </div>
+            </td>
+          </tr>
+        }
+
+        <!-- Empty row -->
+        @if (!isLoading && notes.length === 0) {
+          <tr>
+            <td colspan="7" class="state-cell">
+              <div class="empty-row">
+                <span class="empty-icon">📄</span>
+                <span>No se encontraron notas de crédito.</span>
+              </div>
+            </td>
+          </tr>
+        }
+
+        <!-- Data rows -->
+        @for (note of notes; track note.noteId) {
+          <tr class="data-row">
+            <td>
+              <span class="note-number">NC-{{ note.noteNumber }}</span>
+            </td>
+            <td>
+              <span class="id-chip" [title]="note.noteId">{{ shortId(note.noteId) }}</span>
+            </td>
+            <td>
+              <span class="id-chip invoice-chip" [title]="note.invoiceId">{{ shortId(note.invoiceId) }}</span>
+            </td>
+            <td>{{ formatDate(note.issueDate) }}</td>
+            <td class="reason-cell">
+              <span class="reason-text" [title]="note.reason">{{ note.reason }}</span>
+            </td>
+            <td class="created-cell">{{ formatDateTime(note.created) }}</td>
+            <td class="actions">
+              <button
+                id="btn-detail-{{ note.noteNumber }}"
+                class="action-btn"
+                title="Ver Detalle"
+                (click)="openDetailModal(note)">
+                👁️
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- ── Pagination ─────────────────────────────────────────────────────── -->
+    <div class="pagination-section">
+      <span class="page-info">Página {{ currentPageIndex + 1 }}</span>
+      <div class="pagination-controls">
+        <button
+          id="btn-prev-page"
+          class="page-btn"
+          [disabled]="currentPageIndex === 0 || isLoading"
+          (click)="prevPage()">
+          &lt; Anterior
+        </button>
+        <button
+          id="btn-next-page"
+          class="page-btn"
+          [disabled]="!hasMore || isLoading"
+          (click)="nextPage()">
+          Siguiente &gt;
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Detail Modal ──────────────────────────────────────────────────────── -->
+@if (showDetailModal && selectedNote) {
+  <div class="modal-overlay" (click)="closeDetailModal()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+
+      <div class="modal-header">
+        <div class="modal-title">
+          <span class="modal-icon">📝</span>
+          <h2>Nota de Crédito NC-{{ selectedNote.noteNumber }}</h2>
+        </div>
+        <button id="btn-close-detail" class="close-btn" title="Cerrar" (click)="closeDetailModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Info grid -->
+        <div class="detail-grid">
+          <div class="detail-item">
+            <span class="detail-label">Número</span>
+            <span class="detail-value highlight">NC-{{ selectedNote.noteNumber }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha de Emisión</span>
+            <span class="detail-value">{{ formatDate(selectedNote.issueDate) }}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Fecha de Creación</span>
+            <span class="detail-value">{{ formatDateTime(selectedNote.created) }}</span>
+          </div>
+        </div>
+
+        <!-- IDs section -->
+        <div class="ids-section">
+          <div class="id-row">
+            <span class="id-label">ID de Nota</span>
+            <span class="id-value">{{ selectedNote.noteId }}</span>
+          </div>
+          <div class="id-row">
+            <span class="id-label">Factura Asociada</span>
+            <span class="id-value">{{ selectedNote.invoiceId }}</span>
+          </div>
+        </div>
+
+        <!-- Reason section -->
+        <div class="reason-section">
+          <span class="detail-label">Motivo de la Nota</span>
+          <p class="reason-body">{{ selectedNote.reason }}</p>
+        </div>
+
+        <!-- Read-only notice -->
+        <div class="readonly-notice">
+          🔒 Esta nota de crédito es de solo lectura y no puede ser modificada.
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="btn-close-detail-footer" class="btn-primary" (click)="closeDetailModal()">Cerrar</button>
+      </div>
+
+    </div>
+  </div>
+}

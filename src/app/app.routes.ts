@@ -5,6 +5,7 @@ import { Dashboard } from './dashboard/dashboard';
 import { Clientes } from './clientes/clientes';
 import { Facturas } from './facturas/facturas';
 import { ProductosComponent } from './productos/productos';
+import { NotasCreditoComponent } from './notas-credito/notas-credito';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -17,6 +18,7 @@ export const routes: Routes = [
       { path: 'clientes', component: Clientes },
       { path: 'facturas', component: Facturas },
       { path: 'productos', component: ProductosComponent },
+      { path: 'notas-credito', component: NotasCreditoComponent },
     ]
   }
 ];
