@@ -130,13 +130,18 @@
 }
 
 .badge-enviada {
-  background-color: #eef3ff;
-  color: #4576e5
+  background-color: #eaf8f0;
+  color: #22a05b
 }
 
 .badge-pendiente {
   background-color: #fff4e5;
   color: #d18228
+}
+
+.badge-anulada {
+  background-color: #fde8e8;
+  color: #e02424
 }
 
 .actions {
