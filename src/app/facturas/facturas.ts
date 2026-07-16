@@ -273,22 +273,30 @@ export class Facturas implements OnInit {
   }
 
   deleteInvoice(invoiceId: string) {
-    if (confirm('¿Está seguro de que desea eliminar esta factura?')) {
-      const url = `${environment.apiUrl}/u-role/invoices/${invoiceId}`;
-
-      // Perform delete call, and fallback/mock local filter on success/error since the API doesn't specify DELETE
-      this.http.delete(url, { withCredentials: true }).subscribe({
-        next: () => {
-          this.invoices = this.invoices.filter(inv => inv.invoiceId !== invoiceId);
-          this.cdr.detectChanges();
-        },
-        error: (err) => {
-          console.warn('DELETE endpoint might not be implemented, removing locally as fallback.', err);
-          this.invoices = this.invoices.filter(inv => inv.invoiceId !== invoiceId);
-          this.cdr.detectChanges();
-        }
-      });
+    const reason = prompt('Para anular (eliminar) esta factura, por favor ingrese el motivo o razón de la Nota de Crédito:');
+    if (reason === null) return; // Cancelled by user
+    if (!reason.trim()) {
+      alert('Debe ingresar un motivo válido para anular la factura.');
+      return;
     }
+
+    const url = `${environment.apiUrl}/a-role/credit-notes`;
+    const payload = {
+      invoiceId: invoiceId,
+      reason: reason.trim()
+    };
+
+    this.http.post(url, payload, { withCredentials: true }).subscribe({
+      next: () => {
+        alert('Factura anulada con éxito mediante Nota de Crédito.');
+        // Refresh current page
+        this.fetchInvoices(this.cursors[this.currentPageIndex]);
+      },
+      error: (err) => {
+        console.error('Error issuing credit note for invoice deletion', err);
+        alert('Error al intentar anular la factura con Nota de Crédito.');
+      }
+    });
   }
 
   openDetailModal(invoice: InvoiceResponse) {
