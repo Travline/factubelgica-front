@@ -40,8 +40,8 @@
           <td>€ {{ invoice.totalNet + (invoice.totalVat / 100) | number:'1.2-2' }}</td>
           <td>
             <span class="badge" [ngClass]="{
-              'badge-pagada': invoice.status.toLowerCase() === 'pagada' || invoice.status.toLowerCase() === 'paid',
-              'badge-enviada': invoice.status.toLowerCase() === 'enviada' || invoice.status.toLowerCase() === 'sent',
+              'badge-pagada': invoice.status.toLowerCase() === 'pagado' || invoice.status.toLowerCase() === 'paid',
+              'badge-enviada': invoice.status.toLowerCase() === 'enviado' || invoice.status.toLowerCase() === 'sent',
               'badge-pendiente': invoice.status.toLowerCase() === 'pendiente' || invoice.status.toLowerCase() === 'pending',
               'badge-anulada': invoice.status.toLowerCase() === 'anulada' || invoice.status.toLowerCase() === 'cancelled' || invoice.status.toLowerCase() === 'anulado'
             }">
