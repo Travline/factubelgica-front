@@ -2,6 +2,7 @@ import { Component, OnInit, inject, PLATFORM_ID, ChangeDetectorRef } from '@angu
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { AuthService } from '../auth/auth';
 import { environment } from '../../environments/environment';
 
@@ -54,6 +55,7 @@ export class Facturas implements OnInit {
   public authService = inject(AuthService);
   private platformId = inject(PLATFORM_ID);
   private cdr = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   invoices: InvoiceResponse[] = [];
   isLoading = false;
@@ -307,6 +309,10 @@ export class Facturas implements OnInit {
   closeDetailModal() {
     this.showDetailModal = false;
     this.selectedInvoice = null;
+  }
+
+  viewDocument(invoiceId: string) {
+    this.router.navigate(['/invoices', invoiceId]);
   }
 }
 
